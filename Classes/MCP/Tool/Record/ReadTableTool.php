@@ -642,8 +642,10 @@ class ReadTableTool extends AbstractRecordTool
             }
         }
 
-        // Convert FlexForm XML to JSON
-        if ($this->tableAccessService->isFlexFormField($table, $field) && is_string($value) && !empty($value) && strpos($value, '<?xml') === 0) {
+        // Convert FlexForm XML to JSON. TYPO3 12 (and records saved by it) store the
+        // XML without a "<?xml" prolog, so the root element is accepted as well.
+        if ($this->tableAccessService->isFlexFormField($table, $field) && is_string($value) && !empty($value)
+            && (strpos($value, '<?xml') === 0 || strpos($value, '<T3FlexForms>') === 0)) {
             try {
                 // Use TYPO3's FlexFormService to convert XML to array. The
                 // class is aliased to FlexFormTools in TYPO3 14 (#107945) but

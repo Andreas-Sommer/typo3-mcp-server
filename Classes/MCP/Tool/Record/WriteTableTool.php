@@ -1816,7 +1816,11 @@ class WriteTableTool extends AbstractRecordTool
                         $childData[$matchField] = $matchValue;
                     }
 
-                    $key = 'NEW' . uniqid() . '_' . $index;
+                    // No underscore in the key: these keys end up in the parent's field value,
+                    // where DataHandler's remap stack reads "a_b" as table "a", uid "b". The
+                    // reference then becomes "a_" and the TYPO3 12 FileExtensionFilter throws
+                    // (TYPO3 13 catches it and drops the reference).
+                    $key = 'NEW' . uniqid() . 'n' . $index;
                 } else {
                     $key = $this->resolveToWorkspaceUid($foreignTable, $existingUid);
                 }
@@ -2276,6 +2280,13 @@ class WriteTableTool extends AbstractRecordTool
             // here so the round trip with ReadTableTool (which json_decodes the value
             // back into an array) is symmetric.
             $fieldType = $fieldConfig['config']['type'] ?? '';
+
+            // TYPO3 12 DataHandler applies a bitmask to check values without casting,
+            // so a non-numeric string throws a TypeError. TYPO3 13 casts to int first.
+            if ($fieldType === 'check' && is_string($value) && !is_numeric($value)) {
+                $data[$fieldName] = (int)$value;
+            }
+
             if ($fieldType === 'imageManipulation' && is_array($value)) {
                 $data[$fieldName] = json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                 continue;
@@ -2284,7 +2295,7 @@ class WriteTableTool extends AbstractRecordTool
             // Handle FlexForm fields
             if ($this->isFlexFormField($table, $fieldName)) {
                 // If the value is already a string (XML), keep it as is
-                if (is_string($value) && strpos($value, '<?xml') === 0) {
+                if (is_string($value) && (strpos($value, '<?xml') === 0 || strpos($value, '<T3FlexForms>') === 0)) {
                     continue;
                 }
 

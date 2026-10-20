@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Hn\McpServer\Service;
 
+use Hn\McpServer\Compatibility\Typo3Compatibility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Context\WorkspaceAspect;
@@ -29,6 +30,8 @@ class WorkspaceContextService
             return $currentWorkspace;
         }
         
+        Typo3Compatibility::ensureLanguageService();
+
         // First check if user already has access to workspaces
         $workspaceId = $this->getFirstWritableWorkspace($beUser);
         
