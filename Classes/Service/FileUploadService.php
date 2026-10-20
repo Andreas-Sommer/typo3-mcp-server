@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Hn\McpServer\Service;
 
+use Hn\McpServer\Compatibility\Typo3Compatibility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Resource\DefaultUploadFolderResolver;
-use TYPO3\CMS\Core\Resource\Enum\DuplicationBehavior;
 use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
 use TYPO3\CMS\Core\Resource\Exception\IllegalFileExtensionException;
@@ -249,7 +249,7 @@ class FileUploadService implements SingletonInterface
         }
 
         try {
-            $file = $folder->getStorage()->addFile($tempPath, $folder, $fileName, DuplicationBehavior::RENAME);
+            $file = $folder->getStorage()->addFile($tempPath, $folder, $fileName, Typo3Compatibility::duplicationBehaviorRename());
         } catch (IllegalFileExtensionException $e) {
             throw new \InvalidArgumentException('This file extension is not allowed: ' . $e->getMessage(), 0, $e);
         } catch (\TYPO3\CMS\Core\Validation\ResultException $e) {

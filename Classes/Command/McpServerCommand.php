@@ -11,7 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Configuration\Tca\TcaFactory;
+use Hn\McpServer\Compatibility\Typo3Compatibility;
 use Hn\McpServer\Service\BackendUserContextService;
 use Hn\McpServer\MCP\McpServerFactory;
 
@@ -39,8 +39,7 @@ class McpServerCommand extends Command
             $this->ensureAdminRights();
 
             // Ensure TCA is loaded using proper TYPO3 core method
-            $tcaFactory = GeneralUtility::getContainer()->get(TcaFactory::class);
-            $GLOBALS['TCA'] = $tcaFactory->get();
+            $GLOBALS['TCA'] = Typo3Compatibility::loadTca();
 
             // Set up debugging to stderr
             $debug = static function ($message) {

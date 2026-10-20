@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Hn\McpServer\Database\Query\Restriction;
 
+use Hn\McpServer\Compatibility\Typo3Compatibility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Expression\CompositeExpression;
 use TYPO3\CMS\Core\Database\Query\Expression\ExpressionBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\QueryRestrictionInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Versioning\VersionState;
 
 /**
  * Query restriction to exclude live records that are superseded by a version in the current
@@ -74,8 +74,8 @@ class WorkspaceDeletePlaceholderRestriction implements QueryRestrictionInterface
                     ->from($tableName)
                     ->where(
                         $subQueryBuilder->expr()->in('t3ver_state', [
-                            $subQueryBuilder->expr()->literal((string)VersionState::DELETE_PLACEHOLDER->value),
-                            $subQueryBuilder->expr()->literal((string)VersionState::MOVE_POINTER->value),
+                            $subQueryBuilder->expr()->literal((string)Typo3Compatibility::versionStateValue('DELETE_PLACEHOLDER')),
+                            $subQueryBuilder->expr()->literal((string)Typo3Compatibility::versionStateValue('MOVE_POINTER')),
                         ]),
                         $subQueryBuilder->expr()->eq('t3ver_wsid', 
                             $subQueryBuilder->expr()->literal((string)$this->workspaceId)

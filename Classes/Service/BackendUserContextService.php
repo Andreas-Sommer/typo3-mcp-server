@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Hn\McpServer\Service;
 
+use Hn\McpServer\Compatibility\Typo3Compatibility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
-use TYPO3\CMS\Core\Configuration\Tca\TcaFactory;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Context\UserAspect;
 use TYPO3\CMS\Core\Context\WorkspaceAspect;
@@ -170,7 +170,7 @@ class BackendUserContextService implements SingletonInterface
     protected function ensureTcaIsLoaded(): void
     {
         if (empty($GLOBALS['TCA'])) {
-            $GLOBALS['TCA'] = GeneralUtility::getContainer()->get(TcaFactory::class)->get();
+            $GLOBALS['TCA'] = Typo3Compatibility::loadTca();
         }
     }
 }

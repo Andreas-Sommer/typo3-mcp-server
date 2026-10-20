@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace Hn\McpServer\Service;
 
 use Doctrine\DBAL\ArrayParameterType;
+use Hn\McpServer\Compatibility\Typo3Compatibility;
 use Hn\McpServer\Event\AfterSchemaLoadEvent;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\Query\QueryHelper;
-use TYPO3\CMS\Core\Schema\Capability\TcaSchemaCapability;
-use TYPO3\CMS\Core\Schema\TcaSchemaFactory;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -26,7 +25,8 @@ class TableAccessService implements SingletonInterface
 {
     protected ?BackendUserAuthentication $backendUser = null;
     protected WorkspaceContextService $workspaceContextService;
-    protected TcaSchemaFactory $tcaSchemaFactory;
+    /** @var \TYPO3\CMS\Core\Schema\TcaSchemaFactory|\Hn\McpServer\Compatibility\Schema\LegacyTcaSchemaFactory */
+    protected object $tcaSchemaFactory;
     protected ?array $additionalReadOnlyTables = null;
     protected ?array $additionalStandaloneTables = null;
     protected ?int $cachedDefaultTSconfigPid = null;
@@ -34,7 +34,7 @@ class TableAccessService implements SingletonInterface
     public function __construct()
     {
         $this->workspaceContextService = GeneralUtility::makeInstance(WorkspaceContextService::class);
-        $this->tcaSchemaFactory = GeneralUtility::makeInstance(TcaSchemaFactory::class);
+        $this->tcaSchemaFactory = Typo3Compatibility::getTcaSchemaFactory();
     }
 
     /**
@@ -190,7 +190,7 @@ class TableAccessService implements SingletonInterface
         // Check workspace capability. Workspace-capable tables are the default set.
         // Non-workspace tables are only accessible if explicitly configured as additional read-only tables.
         $info['workspace_capable'] = $this->tcaSchemaFactory->has($table)
-            && $this->tcaSchemaFactory->get($table)->hasCapability(TcaSchemaCapability::Workspace);
+            && $this->tcaSchemaFactory->get($table)->isWorkspaceAware();
         $isAdditionalReadOnly = in_array($table, $this->getAdditionalReadOnlyTables(), true);
         if (!$info['workspace_capable'] && !$isAdditionalReadOnly) {
             $info['reasons'][] = 'Table is not workspace-capable';
