@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Hn\McpServer\Tests\Functional\MCP\Tool;
 
+use Hn\McpServer\Compatibility\Typo3Compatibility;
 use Hn\McpServer\MCP\Tool\Record\WriteTableTool;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -379,8 +380,13 @@ class WriteTableToolErrorTest extends FunctionalTestCase
             ]
         ]);
         
-        // The tool should handle this gracefully - DataHandler will fail
-        $this->assertFalse($result->isError, json_encode($result->jsonSerialize()));
+        // The tool should handle this gracefully - DataHandler will fail.
+        // TYPO3 12 DataHandler logs this as an error, which the tool reports.
+        if (Typo3Compatibility::isTypo3V12()) {
+            $this->assertTrue($result->isError, json_encode($result->jsonSerialize()));
+        } else {
+            $this->assertFalse($result->isError, json_encode($result->jsonSerialize()));
+        }
         
         // But the record shouldn't actually be created
         $record = BackendUtility::getRecord('pages', 99999);
@@ -420,8 +426,13 @@ class WriteTableToolErrorTest extends FunctionalTestCase
             ]
         ]);
         
-        // DataHandler should handle this, but record shouldn't be created
-        $this->assertFalse($result->isError, json_encode($result->jsonSerialize()));
+        // DataHandler should handle this, but record shouldn't be created.
+        // TYPO3 12 DataHandler logs this as an error, which the tool reports.
+        if (Typo3Compatibility::isTypo3V12()) {
+            $this->assertTrue($result->isError, json_encode($result->jsonSerialize()));
+        } else {
+            $this->assertFalse($result->isError, json_encode($result->jsonSerialize()));
+        }
         
         // Verify no record was created
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)

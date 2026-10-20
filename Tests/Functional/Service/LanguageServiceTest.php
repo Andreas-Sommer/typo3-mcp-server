@@ -7,6 +7,7 @@ namespace Hn\McpServer\Tests\Functional\Service;
 use Hn\McpServer\Service\LanguageService;
 use Symfony\Component\Yaml\Yaml;
 use TYPO3\CMS\Core\Configuration\SiteConfiguration;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
@@ -268,7 +269,10 @@ class LanguageServiceTest extends FunctionalTestCase
         
         $yamlContent = Yaml::dump($siteConfiguration, 99, 2);
         GeneralUtility::writeFile($configPath . '/config.yaml', $yamlContent, true);
-        
+        // TYPO3 12 reads all site configurations once and caches them, a file written
+        // later is only picked up after an explicit reload
+        GeneralUtility::makeInstance(SiteFinder::class)->getAllSites(false);
+
         // Re-initialize the service to pick up new site
         $newLanguageService = GeneralUtility::makeInstance(LanguageService::class, '_', true);
         

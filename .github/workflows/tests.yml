@@ -15,6 +15,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - { typo3: '12.4', php: '8.2' }
+          - { typo3: '12.4', php: '8.3' }
           - { typo3: '13.4', php: '8.2' }
           - { typo3: '13.4', php: '8.3' }
           - { typo3: '13.4', php: '8.4' }
@@ -45,6 +47,12 @@ jobs:
             "typo3/cms-workspaces:^${{ matrix.typo3 }}"
           composer require --no-update --no-interaction --no-progress --dev \
             "typo3/cms-install:^${{ matrix.typo3 }}"
+
+      # TYPO3 12 is in ELTS: the public 12.4 releases carry security advisories, which
+      # Composer refuses to install by default. Acceptable here, CI only runs tests.
+      - name: Allow TYPO3 12.4 releases with advisories
+        if: matrix.typo3 == '12.4'
+        run: composer config policy.advisories.block false
 
       - name: Install Composer dependencies
         run: composer update --no-interaction --prefer-dist

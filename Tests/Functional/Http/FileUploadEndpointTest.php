@@ -176,9 +176,13 @@ class FileUploadEndpointTest extends FunctionalTestCase
     public function testExpiredTokenIsRejected(): void
     {
         $token = $this->createToken();
-        GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getConnectionForTable('tx_mcpserver_upload_tokens')
-            ->update('tx_mcpserver_upload_tokens', ['expires' => time() - 10], []);
+        // Query builder instead of Connection::update() with empty criteria, which
+        // doctrine/dbal 3 (TYPO3 12) renders as invalid SQL
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getQueryBuilderForTable('tx_mcpserver_upload_tokens');
+        $queryBuilder->update('tx_mcpserver_upload_tokens')
+            ->set('expires', time() - 10)
+            ->executeStatement();
 
         $response = $this->dispatchUpload($token, $this->pngBytes(), ['fileName' => 'late.png']);
         $this->assertEquals(401, $response->getStatusCode());

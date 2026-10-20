@@ -39,10 +39,10 @@ class TableAccessServiceTSconfigTest extends FunctionalTestCase
         // (#101799), and `Configuration/page.tsconfig` is loaded from extensions
         // at bootstrap. We therefore seed page TSconfig for pid=0 directly into
         // the runtime cache that `BackendUtility::getPagesTSconfig(0)` consults
-        // first. The minimum supported version is 13, where the cache keys are
+        // first. The minimum supported version is 12, where the cache keys are
         // identical, so the same approach works there as well.
-        if (GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion() < 13) {
-            $this->markTestSkipped('TableAccessService requires TYPO3 13 or newer.');
+        if (GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion() < 12) {
+            $this->markTestSkipped('TableAccessService requires TYPO3 12 or newer.');
         }
 
         $this->importCSVDataSet(__DIR__ . '/../Fixtures/be_users.csv');

@@ -160,7 +160,14 @@ class SubdirectoryRoutingTest extends AbstractFunctionalTest
             [],
             $serverParams
         );
-        $request = $request->withAttribute('normalizedParams', NormalizedParams::createFromServerParams($serverParams));
+        // Pass the entry script explicitly: Environment::getCurrentScript() points to
+        // phpunit under the TYPO3 12 testing framework, not to the web entry point.
+        $request = $request->withAttribute('normalizedParams', new NormalizedParams(
+            $serverParams,
+            $GLOBALS['TYPO3_CONF_VARS']['SYS'],
+            $serverParams['SCRIPT_FILENAME'],
+            dirname($serverParams['SCRIPT_FILENAME'])
+        ));
         $GLOBALS['TYPO3_REQUEST'] = $request;
 
         return $request;

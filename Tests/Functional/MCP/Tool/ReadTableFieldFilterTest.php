@@ -28,6 +28,8 @@ class ReadTableFieldFilterTest extends FunctionalTestCase
     {
         parent::setUp();
         $this->importCSVDataSet(__DIR__ . '/../../Fixtures/be_users.csv');
+        // TYPO3 12 DataHandler refuses inserts on a missing page even for admins
+        $this->importCSVDataSet(__DIR__ . '/../../Fixtures/pages.csv');
         $this->setUpBackendUser(1);
     }
 

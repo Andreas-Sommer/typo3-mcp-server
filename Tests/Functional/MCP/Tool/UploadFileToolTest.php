@@ -267,7 +267,14 @@ class UploadFileToolTest extends FunctionalTestCase
             'REQUEST_URI' => '/subdir/mcp',
         ];
         $request = new ServerRequest(new Uri('https://example.com/subdir/mcp'), 'POST', null, [], $serverParams);
-        $request = $request->withAttribute('normalizedParams', NormalizedParams::createFromRequest($request));
+        // Pass the entry script explicitly: Environment::getCurrentScript() points to
+        // phpunit under the TYPO3 12 testing framework, not to public/index.php.
+        $request = $request->withAttribute('normalizedParams', new NormalizedParams(
+            $serverParams,
+            $GLOBALS['TYPO3_CONF_VARS']['SYS'],
+            Environment::getPublicPath() . '/index.php',
+            Environment::getPublicPath()
+        ));
 
         $siteInformation = GeneralUtility::makeInstance(SiteInformationService::class);
         $siteInformation->setCurrentRequest($request);

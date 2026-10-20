@@ -8,6 +8,7 @@ use Hn\McpServer\MCP\Tool\Record\ReadTableTool;
 use Hn\McpServer\MCP\Tool\Record\WriteTableTool;
 use Hn\McpServer\Tests\Functional\AbstractFunctionalTest;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -143,5 +144,8 @@ class WriteTablePageTSconfigTest extends AbstractFunctionalTest
             '    locale: en_US.UTF-8',
             '',
         ]));
+        // TYPO3 12 reads all site configurations once and caches them, a file written
+        // later is only picked up after an explicit reload
+        GeneralUtility::makeInstance(SiteFinder::class)->getAllSites(false);
     }
 }

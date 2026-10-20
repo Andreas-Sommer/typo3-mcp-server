@@ -166,15 +166,16 @@ class GetFlexFormSchemaToolTest extends FunctionalTestCase
     {
         $tool = new GetFlexFormSchemaTool();
         
+        // sys_registry instead of sys_log: sys_log still has TCA in TYPO3 12
         $result = $tool->execute([
-            'table' => 'sys_log',
+            'table' => 'sys_registry',
             'field' => 'pi_flexform',
             'identifier' => 'form_formframework'
         ]);
         
         $this->assertTrue($result->isError);
         $this->assertCount(1, $result->content);
-        $this->assertStringContainsString('Cannot access table \'sys_log\': Table does not exist in TCA', $result->content[0]->text);
+        $this->assertStringContainsString('Cannot access table \'sys_registry\': Table does not exist in TCA', $result->content[0]->text);
     }
 
     /**
